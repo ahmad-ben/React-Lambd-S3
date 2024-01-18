@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  min-width: 0;
 }
 
 .logo {
@@ -39,4 +40,25 @@
 
 .read-the-docs {
   color: #888;
+}
+
+h2 span{
+  color: #e2f9ffaa;
+  font-size: 40px;
+}
+
+.s3Object{
+  word-wrap: break-word;
+  background-color: #010305;
+  border: 1px solid #0075ff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  min-width: 0px;
+}
+
+.s3Object h3{
+  margin-top: 5px;
+  color: #0075ff;
+  font-size: 30px;
 }

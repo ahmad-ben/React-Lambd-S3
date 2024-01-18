@@ -1,10 +1,10 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import { BucketDataInt } from './interface';
 
 function App() {
   /* ----- VARIABLES ----- */
-  const apiEndpoint = "https://msenvifcda.execute-api.us-east-1.amazonaws.com/Test1";
+  const apiEndpoint = "https://yrlf5jwh3m.execute-api.us-east-1.amazonaws.com/S3Data";
 
   /* ----- STATES ----- */
   const [ s3Data, setS3Data ] = useState<BucketDataInt[]>([]);
@@ -47,16 +47,19 @@ function App() {
       {
         selectedBucketName &&
         <>
-        <h2>{ selectedBucketName } Objects:</h2>
+        <h2> <span>{ selectedBucketName }</span> Objects:</h2>
         {
           s3Data
-            .find(bucketObj => bucketObj.bucketName === selectedBucketName)?.objects
-              .map((objInfo, idx) => (
-                <Fragment key={idx}>
-                  <h3>Object name: {objInfo.name}</h3>
-                  <div>Object text content: {objInfo.content}</div>
-                </Fragment>
-              ))
+            .find(bucketObj => bucketObj.bucketName === selectedBucketName)?.objects.length === 0 ?
+              <div>THERE IS NO OBJECTS IN THIS BUCKET.</div> :
+              s3Data
+              .find(bucketObj => bucketObj.bucketName === selectedBucketName)?.objects
+                .map((objInfo, idx) => (
+                  <div className='s3Object' key={idx}>
+                    <h3>Object name: {objInfo.name}</h3>
+                    <div>Object text content: {objInfo.content}</div>
+                  </div>
+                ))
         }
         </>
 
