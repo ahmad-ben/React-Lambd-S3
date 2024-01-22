@@ -4,7 +4,7 @@ import { BucketDataInt } from './interface';
 
 function App() {
   /* ----- VARIABLES ----- */
-  const apiEndpoint = "https://yrlf5jwh3m.execute-api.us-east-1.amazonaws.com/S3Data";
+  const apiEndpoint = "https://h7ao4dkxij.execute-api.us-east-1.amazonaws.com/s3Data";
 
   /* ----- STATES ----- */
   const [ s3Data, setS3Data ] = useState<BucketDataInt[]>([]);
