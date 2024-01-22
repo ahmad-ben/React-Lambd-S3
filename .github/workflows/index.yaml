@@ -4,6 +4,12 @@ on:
   push:
     branches: [ main ]
 
+inputs:    
+  capabilities:
+    description: "The comma-delimited list of stack template capabilities to acknowledge. Defaults to 'CAPABILITY_IAM'"
+    required: false
+    default: "CAPABILITY_IAM"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
