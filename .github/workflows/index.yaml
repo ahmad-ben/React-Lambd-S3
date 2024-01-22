@@ -1,8 +1,9 @@
-name: 'Deploy Workshop 6 with Github action and AWS CloudFormation'
+name: 'Deploy to AWS CloudFormation'
 
 on: 
   push:
     branches: [ main ]
+  
 
 jobs:
   deploy:
@@ -21,5 +22,6 @@ jobs:
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: CFStack-1 #Name of CloudFormation Stack
+          name: tekloon-test-stack #Name of CloudFormation Stack
           template: CFTemplate.yaml
+          no-fail-on-empty-changeset: "1"
