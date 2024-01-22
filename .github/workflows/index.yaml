@@ -4,12 +4,6 @@ on:
   push:
     branches: [ main ]
 
-inputs:    
-  capabilities:
-    description: "The comma-delimited list of stack template capabilities to acknowledge. Defaults to 'CAPABILITY_IAM'"
-    required: false
-    default: "CAPABILITY_IAM"
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,5 +23,3 @@ jobs:
         with:
           name: CFStack-1 #Name of CloudFormation Stack
           template: CFTemplate.yaml
-          capabilities: [CAPABILITY_NAMED_IAM]
-          no-fail-on-empty-changeset: "1"
