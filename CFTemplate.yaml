@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create all AWS resources dynamically. 
+
+Resources:
+
+  lambdaIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole 
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      RoleName: lambdaRole
+
+  lambdaFunction:
+    DependsOn: lambdaIamRole
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to get all S3 buckets and their data.
+      FunctionName: get-buckets
+      Handler: index.lambda_handler 
+      MemorySize: 128
+      Role: !GetAtt lambdaIamRole.Arn
+      Runtime: python3.11 
+      Timeout: 30
+      Code: 
+        ZipFile: |
+          import json
+          import boto3
+
+          def lambda_handler(event, context):
+
+            client = boto3.client('s3')
+            bucketList = []
+            Buckets = client.list_buckets()["Buckets"]
+
+            for bucket in Buckets:
+              bucketName = bucket["Name"]
+              allObject = []
+              my_objects = client.list_objects_v2( Bucket = bucketName )
+
+              try:
+                for obj in my_objects["Contents"]:
+                  response = client.get_object(Bucket = bucketName, Key = obj["Key"])["Body"].read().decode('utf-8')
+                  allObject.append({'name' : obj["Key"], 'content' : response})
+                bucketList.append( {'bucketName':bucketName, 'objects':allObject} )
+              except Exception  as e:
+                bucketList.append({'bucketName':bucketName, 'objects':[]})
+                continue
+
+            data={}
+            data['statusCode'] = 200
+            data['headers'] = {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+                "Access-Control-Allow-Methods": "OPTIONS,GET"
+              }
+            data['body'] = json.dumps(bucketList)
+            return data
+
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: BucketsApi
+
+  RestAPIS3Path:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: allBuckets
+
+  GetS3DataMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !GetAtt RestAPIS3Path.ResourceId
+      HttpMethod: GET
+      MethodResponses: 
+        - StatusCode: 200
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${lambdaFunction.Arn}/invocations
+
+  APIDeploy:
+    DependsOn: GetS3DataMethod
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      RestApiId: !Ref RestAPI
+      Description: Deploy the current API to use.
+      StageName: Stage1
+
+  # LambdaInvokePer:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !GetAtt lambdaFunction.Arn
+  #     Action: lambda:InvokeFunction
+  #     Principal: apigateway.amazonaws.com
+  #     SourceAccount: 086041644501
