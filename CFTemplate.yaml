@@ -108,3 +108,4 @@ Resources:
   #     Principal: apigateway.amazonaws.com
   #     SourceAccount: 086041644501
   # Add the credentials to their proper place.
+  #
